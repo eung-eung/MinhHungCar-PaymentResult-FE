@@ -16,7 +16,7 @@ const getPaymentResult = () => {
 const showSwal = (status) => {
     withReactContent(Swal)
         .fire({
-            title: status ? "Payment complete!" : "Payment failed",
+            title: status ? "Thanh toán thành công!" : "Thanh toán thất bại",
             icon: status ? "success" : "error",
             allowOutsideClick: false,
             allowEscapeKey: false,
@@ -25,7 +25,7 @@ const showSwal = (status) => {
         .then((res) => {
             if (res.isConfirmed) {
                 window.postMessage("success");
-            }else{
+            } else {
                 window.postMessage("failed")
             }
         });
