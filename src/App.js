@@ -8,12 +8,14 @@ const getParam = (key) => {
     const myParam = urlParams.get(key);
     return myParam;
 };
-const getPaymentResult = () => {
+const getPaymentResult = async () => {
     const responseCode = getParam("vnp_ResponseCode");
-
-    return responseCode === "00" ? true : false;
+    const ref = getParam("vnp_TxnRef")
+    // return responseCode === "00" ? true : false;
 };
 const showSwal = (status) => {
+    console.log(status);
+
     withReactContent(Swal)
         .fire({
             title: status ? "Thanh toán thành công!" : "Thanh toán thất bại",
@@ -30,22 +32,46 @@ const showSwal = (status) => {
             }
         });
 };
+let timer
 function App() {
     const MySwal = withReactContent(Swal);
-    const [result, setResult] = useState("loading");
+    const [orderInfo, setOrderInfo] = useState(getParam('vnp_OrderInfo'))
+    const [txnRef, setTxnRef] = useState(getParam("vnp_TxnRef"))
+    const [count, setCount] = useState(0)
+    const [isPaid, setIsPaid] = useState(undefined)
+
+    const getStatusPayment = async () => {
+        return await fetch(`https://minhhungcar.xyz/payment_status?vnp_OrderInfo=${orderInfo}&vnp_TxnRef=${txnRef}`).then(res => res.json())
+    }
+
     useEffect(() => {
-        setTimeout(() => {
-            setResult(getPaymentResult());
-        }, 1000);
+        timer = setInterval(async () => {
+            const p = (await getStatusPayment()).data.status
+            if (p === 'paid') {
+                clearInterval(timer)
+                setIsPaid(true)
+            } else {
+                setCount((prev) => {
+                    if (prev >= 3) {
+                        clearInterval(timer)
+                        setIsPaid(false);
+                    }
+                    return ++prev
+                })
+            }
+
+        }, 1000)
+        return () => clearInterval(timer)
     }, []);
+
     return (
         <div className="container">
-            {result === "loading" && (
+            {isPaid ? 'aaaa' : 'false'}
+            {isPaid === undefined ? (
                 <>
                     <span className="loader"></span>
                 </>
-            )}
-            {result !== "loading" && showSwal(result)}
+            ) : showSwal(isPaid)}
         </div>
     );
 }
