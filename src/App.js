@@ -66,7 +66,6 @@ function App() {
 
     return (
         <div className="container">
-            {isPaid ? 'aaaa' : 'false'}
             {isPaid === undefined ? (
                 <>
                     <span className="loader"></span>
